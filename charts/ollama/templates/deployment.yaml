@@ -67,6 +67,9 @@ spec:
               kill $SERVER_PID
               wait $SERVER_PID 2>/dev/null || true
               echo "Models preloaded successfully"
+          env:
+            - name: OLLAMA_MODELS
+              value: {{ .Values.persistence.mountPath }}
           volumeMounts:
             - name: data
               mountPath: {{ .Values.persistence.mountPath }}
@@ -83,8 +86,10 @@ spec:
             - name: http
               containerPort: {{ .Values.service.targetPort }}
               protocol: TCP
-          {{- if .Values.env }}
           env:
+            - name: OLLAMA_MODELS
+              value: {{ .Values.persistence.mountPath }}
+          {{- if .Values.env }}
             {{- toYaml .Values.env | nindent 12 }}
           {{- end }}
           {{- if .Values.livenessProbe.enabled }}
