@@ -68,3 +68,4 @@ spec:
       - CreateNamespace=true
       - SkipDryRunOnMissingResource=true
       - RespectIgnoreDifferences=true
+      - Replace=true  # Use Replace instead of Apply for large CRDs
