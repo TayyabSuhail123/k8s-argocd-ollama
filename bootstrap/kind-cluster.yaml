@@ -1,0 +1,29 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  # Control plane node - no workloads scheduled here
+  - role: control-plane
+
+  # General worker node - for OpenWebUI, Prometheus
+  - role: worker
+    labels:
+      role: general
+
+  # Inference worker node - dedicated to Ollama with taint
+  - role: worker
+    labels:
+      role: inference
+    kubeadmConfigPatches:
+      - |
+        kind: JoinConfiguration
+        nodeRegistration:
+          taints:
+            - key: "role"
+              value: "inference"
+              effect: "NoSchedule"
+
+# Production-grade local cluster configuration:
+# - 3 nodes: control-plane (no workloads), general worker, inference worker
+# - Inference node is tainted to ensure only Ollama (with toleration) runs there
+# - Node labels enable explicit nodeSelector scheduling
+# - Access services via kubectl port-forward (production-like approach)

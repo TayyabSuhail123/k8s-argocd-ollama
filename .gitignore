@@ -1,0 +1,54 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.vim/
+
+# GitHub Copilot instructions (development only)
+.github/copilot-instructions.md
+
+# Kubernetes / Helm
+*.kubeconfig
+kubeconfig
+.kube/
+helm-debug/
+*.tgz
+charts/*.lock
+
+# Secrets (never commit these)
+secrets/
+*.key
+*.pem
+*.crt
+*.p12
+*-secret.yaml
+*secret*.yaml
+
+# Terraform (if you add it later)
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+
+# ArgoCD local data
+argocd-local/
+*.argo-backup
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# OS generated
+Thumbs.db
