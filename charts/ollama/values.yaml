@@ -30,7 +30,7 @@ nodeSelector:
 
 # Tolerate the inference node taint
 tolerations:
-  - key: "workload"
+  - key: "role"
     operator: "Equal"
     value: "inference"
     effect: "NoSchedule"
