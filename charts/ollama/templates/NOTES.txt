@@ -1,0 +1,36 @@
+✅ Ollama has been deployed successfully!
+
+Release: {{ .Release.Name }}
+Namespace: {{ .Release.Namespace }}
+
+📦 Model(s) being preloaded:
+{{- range .Values.models }}
+  - {{ . }}
+{{- end }}
+
+⚠️  Note: First startup will take several minutes to download model weights.
+   Use `kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/name=ollama -c preload-models -f`
+   to watch the download progress.
+
+🔍 Check status:
+   kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/name=ollama
+
+🌐 Access Ollama:
+   kubectl port-forward -n {{ .Release.Namespace }} svc/{{ .Release.Name }} 11434:11434
+   
+   Then test: curl http://localhost:11434/api/generate -d '{
+     "model": "{{ index .Values.models 0 }}",
+     "prompt": "Why is the sky blue?",
+     "stream": false
+   }'
+
+📊 Metrics:
+{{- if .Values.metrics.enabled }}
+   ServiceMonitor enabled - Prometheus will scrape metrics from /metrics
+{{- else }}
+   Metrics disabled - set metrics.enabled=true to enable Prometheus scraping
+{{- end }}
+
+💾 Storage:
+   PVC: {{ .Release.Name }}-data ({{ .Values.persistence.size }})
+   Models stored at: {{ .Values.persistence.mountPath }}

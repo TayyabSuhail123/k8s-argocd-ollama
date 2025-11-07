@@ -1,0 +1,16 @@
+apiVersion: v2
+name: ollama
+description: Ollama - Run Llama 3.2 and other large language models locally
+type: application
+version: 0.1.0
+appVersion: "0.3.14"
+keywords:
+  - ollama
+  - llm
+  - ai
+  - inference
+home: https://ollama.ai
+sources:
+  - https://github.com/ollama/ollama
+maintainers:
+  - name: AI Platform Team

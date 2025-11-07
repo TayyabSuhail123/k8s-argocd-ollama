@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ollama
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: default
+  
+  source:
+    repoURL: https://github.com/TayyabSuhail123/k8s-argocd-ollama.git
+    targetRevision: main
+    path: charts/ollama
+    helm:
+      releaseName: ollama
+      values: |
+        # Use default values from values.yaml
+        # Models will be preloaded: llama3.2:3b
+        
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ai-platform
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
