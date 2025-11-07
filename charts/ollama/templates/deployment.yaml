@@ -70,6 +70,8 @@ spec:
           env:
             - name: OLLAMA_MODELS
               value: {{ .Values.persistence.mountPath }}
+            - name: HOME
+              value: /home/ollama
           volumeMounts:
             - name: data
               mountPath: {{ .Values.persistence.mountPath }}
@@ -89,6 +91,8 @@ spec:
           env:
             - name: OLLAMA_MODELS
               value: {{ .Values.persistence.mountPath }}
+            - name: HOME
+              value: /home/ollama
           {{- if .Values.env }}
             {{- toYaml .Values.env | nindent 12 }}
           {{- end }}

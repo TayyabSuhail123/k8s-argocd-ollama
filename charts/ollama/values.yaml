@@ -41,7 +41,7 @@ persistence:
   storageClass: "standard"
   accessMode: ReadWriteOnce
   size: 20Gi
-  mountPath: /root/.ollama
+  mountPath: /home/ollama/.ollama
 
 # Security context - run as non-root
 securityContext:
