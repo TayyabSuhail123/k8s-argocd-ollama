@@ -15,6 +15,7 @@ spec:
     targetRevision: 65.1.1
     helm:
       releaseName: prometheus
+      skipCrds: true  # Skip CRD management - install manually to avoid annotation size issues
       values: |
         # Lightweight Prometheus for local testing
         prometheus:
@@ -68,4 +69,3 @@ spec:
       - CreateNamespace=true
       - SkipDryRunOnMissingResource=true
       - RespectIgnoreDifferences=true
-      - Replace=true  # Use Replace instead of Apply for large CRDs
