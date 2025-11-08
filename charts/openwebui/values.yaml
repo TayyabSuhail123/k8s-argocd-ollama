@@ -126,11 +126,10 @@ networkPolicy:
       ports:
         - protocol: UDP
           port: 53
-    # Allow HTTPS for HuggingFace model downloads (init container only)
-    # Note: NetworkPolicy applies to all containers, but init runs before main container
-    - to:
-        - namespaceSelector: {}
-      ports:
+    # Allow HTTPS for HuggingFace model downloads (external internet)
+    # Note: This allows external HTTPS traffic needed for init container model downloads
+    # In production, consider using a proxy or pre-baking models into a custom image
+    - ports:
         - protocol: TCP
           port: 443
 
