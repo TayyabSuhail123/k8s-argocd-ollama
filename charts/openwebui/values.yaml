@@ -1,0 +1,135 @@
+# OpenWebUI Configuration
+
+# Replica count
+replicaCount: 1
+
+# Container image
+image:
+  repository: ghcr.io/open-webui/open-webui
+  pullPolicy: IfNotPresent
+  tag: "0.3.32"
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+
+# Resource limits
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "200m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+# Node scheduling - schedule on general worker
+nodeSelector:
+  role: general
+
+# No special tolerations needed for general node
+tolerations: []
+
+# Ollama connection
+ollama:
+  # Ollama service URL (ClusterIP service in same namespace)
+  url: "http://ollama.ai-platform.svc.cluster.local:11434"
+
+# Storage for data
+persistence:
+  enabled: true
+  storageClass: "standard"
+  accessMode: ReadWriteOnce
+  size: 2Gi
+  mountPath: /app/backend/data
+
+# Security context - run as non-root
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+
+# Pod security context
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+  seccompProfile:
+    type: RuntimeDefault
+
+# ServiceAccount
+serviceAccount:
+  create: true
+  name: "openwebui"
+
+# Liveness and readiness probes
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: 8080
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: 8080
+  initialDelaySeconds: 15
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+# Environment variables
+env: []
+
+# Prometheus metrics
+metrics:
+  enabled: true
+
+# NetworkPolicy
+networkPolicy:
+  enabled: true
+  # Allow egress to Ollama only
+  egressRules:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ollama
+      ports:
+        - protocol: TCP
+          port: 11434
+    # Allow DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+        - podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+
+# Secret configuration for sensitive values (production: set a stable secret)
+# - If `existingSecret` is set, the chart will use that Secret and will NOT create one.
+# - If `create` is true and `existingSecret` is empty, the chart will create a Secret.
+#   The secret value will be taken from `secretKey` if provided, otherwise a random
+#   value will be generated on install only (Helm generates a stable value for the
+#   initial install; subsequent upgrades won't re-generate).
+secret:
+  create: true
+  # If you already have a Secret, set its name here to avoid creating a new one
+  existingSecret: ""
+  # Optional: provide a secret value here (string). If empty, a random key is generated on install.
+  # WARNING: putting secrets into values files may be visible in git; prefer external secret management
+  secretKey: ""

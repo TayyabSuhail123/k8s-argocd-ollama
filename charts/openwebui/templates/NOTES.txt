@@ -1,0 +1,38 @@
+✅ Open WebUI has been deployed successfully!
+
+Release: {{ .Release.Name }}
+Namespace: {{ .Release.Namespace }}
+
+🔗 Ollama Connection:
+   Backend: {{ .Values.ollama.url }}
+
+🌐 Access Open WebUI:
+   kubectl port-forward -n {{ .Release.Namespace }} svc/{{ .Release.Name }} 8080:8080
+   
+   Then open: http://localhost:8080
+
+📝 First-time Setup:
+   1. Create an admin account on first access
+   2. The UI will automatically connect to Ollama
+   3. Available models: llama3.2:3b (and any others you've loaded)
+
+🔒 Security:
+   NetworkPolicy enabled - OpenWebUI can only communicate with:
+   - Ollama service (port 11434)
+   - DNS (port 53)
+   All other egress is blocked
+
+📊 Monitoring:
+{{- if .Values.metrics.enabled }}
+   ServiceMonitor enabled - Prometheus will scrape metrics from /metrics
+{{- else }}
+   Metrics disabled - set metrics.enabled=true to enable Prometheus scraping
+{{- end }}
+
+💾 Storage:
+   PVC: {{ .Release.Name }}-data ({{ .Values.persistence.size }})
+   Data stored at: {{ .Values.persistence.mountPath }}
+
+🔍 Check status:
+   kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/name=openwebui
+   kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/name=openwebui

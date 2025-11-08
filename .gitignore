@@ -29,8 +29,10 @@ secrets/
 *.pem
 *.crt
 *.p12
-*-secret.yaml
-*secret*.yaml
+
+# Allow encrypted SealedSecrets (safe to commit)
+!*/sealedsecret.yaml
+!*sealed-secrets*.yaml
 
 # Terraform (if you add it later)
 .terraform/

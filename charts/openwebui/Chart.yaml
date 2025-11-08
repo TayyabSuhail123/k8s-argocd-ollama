@@ -1,0 +1,17 @@
+apiVersion: v2
+name: openwebui
+description: Open WebUI - User-friendly web interface for Ollama
+type: application
+version: 0.1.0
+appVersion: "0.3.32"
+keywords:
+  - openwebui
+  - ollama
+  - llm
+  - ui
+  - chat
+home: https://github.com/open-webui/open-webui
+sources:
+  - https://github.com/open-webui/open-webui
+maintainers:
+  - name: AI Platform Team
