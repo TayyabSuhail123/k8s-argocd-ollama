@@ -36,6 +36,42 @@ spec:
       tolerations:
         {{- toYaml .Values.tolerations | nindent 8 }}
       {{- end }}
+      {{- if and .Values.rag.enabled .Values.rag.preloadModel }}
+      initContainers:
+        # Pre-download embedding model for RAG (requires internet access during init)
+        - name: download-embedding-model
+          image: python:3.11-slim
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Installing dependencies..."
+              pip install --quiet sentence-transformers huggingface-hub
+              
+              echo "Downloading embedding model: {{ .Values.rag.embeddingModel }}"
+              python3 << 'EOF'
+              from sentence_transformers import SentenceTransformer
+              import os
+              
+              # Set cache directory to shared volume
+              cache_dir = "/app/cache"
+              os.makedirs(cache_dir, exist_ok=True)
+              os.environ['SENTENCE_TRANSFORMERS_HOME'] = cache_dir
+              os.environ['HF_HOME'] = cache_dir
+              
+              # Download model
+              model = SentenceTransformer("{{ .Values.rag.embeddingModel }}", cache_folder=cache_dir)
+              print(f"Model downloaded successfully to {cache_dir}")
+              EOF
+              
+              echo "Embedding model ready!"
+          volumeMounts:
+            - name: data
+              mountPath: /app
+          securityContext:
+            runAsNonRoot: false  # Need root to install pip packages
+            runAsUser: 0
+      {{- end }}
       containers:
         - name: openwebui
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -55,6 +91,15 @@ spec:
                 secretKeyRef:
                   name: {{ include "openwebui.fullname" . }}-secret
                   key: webui-secret-key
+            {{- if and .Values.rag.enabled .Values.rag.preloadModel }}
+            # Use cached embedding models from init container
+            - name: SENTENCE_TRANSFORMERS_HOME
+              value: /app/cache
+            - name: HF_HOME
+              value: /app/cache
+            - name: HF_HUB_OFFLINE
+              value: "1"  # Force offline mode - use cached models only
+            {{- end }}
           {{- if .Values.env }}
             {{- toYaml .Values.env | nindent 12 }}
           {{- end }}
