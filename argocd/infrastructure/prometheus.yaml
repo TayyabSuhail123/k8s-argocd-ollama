@@ -12,10 +12,11 @@ spec:
     # Using official Prometheus community Helm chart
     repoURL: https://prometheus-community.github.io/helm-charts
     chart: kube-prometheus-stack
-    targetRevision: 65.1.1
+    targetRevision: 55.0.0  # Using older, more stable version
     helm:
       releaseName: prometheus
       skipCrds: true  # Skip CRD management - install manually to avoid annotation size issues
+      timeout: 10m  # Increase timeout for large chart
       values: |
         # Lightweight Prometheus for local testing
         prometheus:

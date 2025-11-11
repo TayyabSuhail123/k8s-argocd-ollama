@@ -40,7 +40,7 @@ spec:
       initContainers:
         # Pre-download embedding model for RAG (requires internet access during init)
         - name: download-embedding-model
-          image: localhost:5000/python:3.11-slim
+          image: localhost:5001/python:3.11-slim
           command:
             - /bin/sh
             - -c
