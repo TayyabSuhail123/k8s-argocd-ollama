@@ -45,10 +45,22 @@ spec:
             - /bin/sh
             - -c
             - |
-              echo "Installing dependencies (this may take a few minutes)..."
-              pip install sentence-transformers huggingface-hub
+              # Set cache directory
+              cache_dir="/app/cache"
+              model_name="{{ .Values.rag.embeddingModel }}"
+              model_path="$cache_dir/sentence-transformers_${model_name//\//_}"
               
-              echo "Downloading embedding model: {{ .Values.rag.embeddingModel }}"
+              # Check if model already exists
+              if [ -d "$model_path" ] && [ "$(ls -A $model_path)" ]; then
+                echo "✓ Model already cached at $model_path"
+                echo "✓ Skipping download - using cached model"
+                exit 0
+              fi
+              
+              echo "Installing dependencies (this may take a few minutes)..."
+              pip install -q sentence-transformers huggingface-hub
+              
+              echo "Downloading embedding model: $model_name"
               python3 << 'EOF'
               from sentence_transformers import SentenceTransformer
               import os
@@ -64,6 +76,10 @@ spec:
               model = SentenceTransformer("{{ .Values.rag.embeddingModel }}", cache_folder=cache_dir)
               print(f"✓ Model downloaded successfully to {cache_dir}")
               EOF
+              
+              # Fix permissions for the main container (runs as user 1000)
+              echo "Setting permissions..."
+              chown -R 1000:1000 /app/cache
               
               echo "✓ Embedding model ready!"
           volumeMounts:
