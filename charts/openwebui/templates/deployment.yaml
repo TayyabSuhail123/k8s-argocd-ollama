@@ -36,8 +36,20 @@ spec:
       tolerations:
         {{- toYaml .Values.tolerations | nindent 8 }}
       {{- end }}
-      {{- if and .Values.rag.enabled .Values.rag.preloadModel }}
       initContainers:
+        # Fix permissions on application files (OpenWebUI image has root-owned files)
+        - name: fix-permissions
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command:
+            - sh
+            - -c
+            - |
+              echo "Fixing permissions..."
+              chown -R 1000:1000 /app/backend/open_webui 2>/dev/null || true
+              echo "✓ Permissions fixed"
+          securityContext:
+            runAsUser: 0
+      {{- if and .Values.rag.enabled .Values.rag.preloadModel }}
         # Pre-download embedding model for RAG (requires internet access during init)
         - name: download-embedding-model
           image: localhost:5001/python:3.11-slim
@@ -55,7 +67,6 @@ spec:
               if [ -d "$hf_model_path" ] && [ "$(ls -A $hf_model_path 2>/dev/null)" ]; then
                 echo "✓ Model already cached at $hf_model_path"
                 echo "✓ Skipping download - using cached model"
-                chown -R 1000:1000 /app
                 exit 0
               fi
               
@@ -79,14 +90,10 @@ spec:
               print(f"✓ Model downloaded successfully to {cache_dir}")
               EOF
               
-              # Fix permissions for the main container (runs as user 1000)
-              echo "Setting permissions..."
-              chown -R 1000:1000 /app/cache
-              
               echo "✓ Embedding model ready!"
           volumeMounts:
             - name: data
-              mountPath: /app
+              mountPath: /app/backend/data
           securityContext:
             runAsNonRoot: false  # Need root to install pip packages
             runAsUser: 0

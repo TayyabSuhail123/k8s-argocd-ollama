@@ -33,53 +33,6 @@ spec:
       tolerations:
         {{- toYaml .Values.tolerations | nindent 8 }}
       {{- end }}
-      initContainers:
-        {{- if .Values.models }}
-        # Preload models - requires ollama server to be running
-        - name: preload-models
-          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
-          command:
-            - /bin/sh
-            - -c
-            - |
-              # Start ollama server in background
-              ollama serve &
-              SERVER_PID=$!
-              
-              # Wait for server to be ready
-              echo "Waiting for Ollama server to start..."
-              for i in {1..30}; do
-                if curl -s http://localhost:11434/ > /dev/null 2>&1; then
-                  echo "Server is ready!"
-                  break
-                fi
-                echo "Waiting... ($i/30)"
-                sleep 2
-              done
-              
-              # Pull models
-              {{- range .Values.models }}
-              echo "Pulling model {{ . }}..."
-              ollama pull {{ . }} || echo "Failed to pull {{ . }}, continuing..."
-              {{- end }}
-              
-              # Stop server gracefully
-              kill $SERVER_PID
-              wait $SERVER_PID 2>/dev/null || true
-              echo "Models preloaded successfully"
-          env:
-            - name: OLLAMA_MODELS
-              value: {{ .Values.persistence.mountPath }}
-            - name: HOME
-              value: /home/ollama
-          volumeMounts:
-            - name: data
-              mountPath: {{ .Values.persistence.mountPath }}
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-        {{- end }}
       containers:
         - name: ollama
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
