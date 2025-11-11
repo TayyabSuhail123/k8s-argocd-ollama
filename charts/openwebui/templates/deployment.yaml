@@ -48,11 +48,12 @@ spec:
               # Set cache directory
               cache_dir="/app/cache"
               model_name="{{ .Values.rag.embeddingModel }}"
-              model_path="$cache_dir/sentence-transformers_$(echo $model_name | sed 's/\//_/g')"
+              # HuggingFace uses format: models--org--model-name (replace / with --)
+              hf_model_path="$cache_dir/models--$(echo $model_name | sed 's/\//--/g')"
               
-              # Check if model already exists
-              if [ -d "$model_path" ] && [ "$(ls -A $model_path 2>/dev/null)" ]; then
-                echo "✓ Model already cached at $model_path"
+              # Check if model already exists (HuggingFace cache format)
+              if [ -d "$hf_model_path" ] && [ "$(ls -A $hf_model_path 2>/dev/null)" ]; then
+                echo "✓ Model already cached at $hf_model_path"
                 echo "✓ Skipping download - using cached model"
                 chown -R 1000:1000 /app
                 exit 0
