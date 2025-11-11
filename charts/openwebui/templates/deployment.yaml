@@ -48,12 +48,13 @@ spec:
               # Set cache directory
               cache_dir="/app/cache"
               model_name="{{ .Values.rag.embeddingModel }}"
-              model_path="$cache_dir/sentence-transformers_${model_name//\//_}"
+              model_path="$cache_dir/sentence-transformers_$(echo $model_name | sed 's/\//_/g')"
               
               # Check if model already exists
-              if [ -d "$model_path" ] && [ "$(ls -A $model_path)" ]; then
+              if [ -d "$model_path" ] && [ "$(ls -A $model_path 2>/dev/null)" ]; then
                 echo "✓ Model already cached at $model_path"
                 echo "✓ Skipping download - using cached model"
+                chown -R 1000:1000 /app
                 exit 0
               fi
               
