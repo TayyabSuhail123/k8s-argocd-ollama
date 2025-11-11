@@ -38,10 +38,10 @@ ollama:
 
 # RAG (Retrieval-Augmented Generation) configuration
 rag:
-  enabled: true
+  enabled: false
   embeddingModel: "sentence-transformers/all-MiniLM-L6-v2"
   # Pre-download embedding model via init container (requires internet during init)
-  preloadModel: true
+  preloadModel: false
 
 # Storage for data
 persistence:
