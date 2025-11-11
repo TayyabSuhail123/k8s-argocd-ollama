@@ -91,7 +91,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "openwebui.fullname" . }}-secret
-                  key: webui-secret-key
+                  key: WEBUI_SECRET_KEY
             {{- if and .Values.rag.enabled .Values.rag.preloadModel }}
             # Use cached embedding models from init container
             - name: SENTENCE_TRANSFORMERS_HOME
