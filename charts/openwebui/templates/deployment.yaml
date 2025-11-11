@@ -45,8 +45,8 @@ spec:
             - /bin/sh
             - -c
             - |
-              echo "Installing dependencies..."
-              pip install --quiet sentence-transformers huggingface-hub
+              echo "Installing dependencies (this may take a few minutes)..."
+              pip install sentence-transformers huggingface-hub
               
               echo "Downloading embedding model: {{ .Values.rag.embeddingModel }}"
               python3 << 'EOF'
@@ -59,19 +59,20 @@ spec:
               os.environ['SENTENCE_TRANSFORMERS_HOME'] = cache_dir
               os.environ['HF_HOME'] = cache_dir
               
-              # Download model
+              print("Downloading model from HuggingFace...")
+              # Download model - library shows its own progress
               model = SentenceTransformer("{{ .Values.rag.embeddingModel }}", cache_folder=cache_dir)
-              print(f"Model downloaded successfully to {cache_dir}")
+              print(f"✓ Model downloaded successfully to {cache_dir}")
               EOF
               
-              echo "Embedding model ready!"
+              echo "✓ Embedding model ready!"
           volumeMounts:
             - name: data
               mountPath: /app
           securityContext:
             runAsNonRoot: false  # Need root to install pip packages
             runAsUser: 0
-      {{- end }}
+      {{- end}}
       containers:
         - name: openwebui
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

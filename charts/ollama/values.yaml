@@ -64,7 +64,7 @@ podSecurityContext:
 
 # Models to preload (will be downloaded on startup)
 models:
-  - llama3.2:1b
+  - tinyllama:1.1b
 
 # ServiceAccount
 serviceAccount:
