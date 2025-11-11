@@ -60,7 +60,7 @@ spec:
               fi
               
               echo "Installing dependencies (this may take a few minutes)..."
-              pip install -q sentence-transformers huggingface-hub
+              pip install sentence-transformers huggingface-hub --progress-bar on
               
               echo "Downloading embedding model: $model_name"
               python3 << 'EOF'
