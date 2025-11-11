@@ -1,5 +1,12 @@
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
+
+# Configure containerd to use local registry
+containerdConfigPatches:
+- |-
+  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:5001"]
+    endpoint = ["http://kind-registry:5001"]
+
 nodes:
   # Control plane node - no workloads scheduled here
   - role: control-plane
@@ -22,7 +29,8 @@ nodes:
               value: "inference"
               effect: "NoSchedule"
 
-# Production-grade local cluster configuration:
+# Production-grade local cluster configuration with local registry:
+# - Local Docker registry (localhost:5000) for fast image pulls
 # - 3 nodes: control-plane (no workloads), general worker, inference worker
 # - Inference node is tainted to ensure only Ollama (with toleration) runs there
 # - Node labels enable explicit nodeSelector scheduling

@@ -5,9 +5,9 @@ replicaCount: 1
 
 # Container image
 image:
-  repository: ollama/ollama
+  repository: localhost:5001/ollama
   pullPolicy: IfNotPresent
-  tag: "0.3.14"
+  tag: "latest"
 
 # Service configuration
 service:
