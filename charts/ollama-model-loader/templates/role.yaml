@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: ollama-model-loader
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 rules:
   # Model loader doesn't need any Kubernetes API access
