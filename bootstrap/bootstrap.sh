@@ -68,17 +68,24 @@ echo "✓ Namespaces created: argocd, ai-platform, monitoring"
 
 echo ""
 echo "=================================="
-echo "Step 4/7: Installing Prometheus CRDs"
+echo "Step 4/7: Installing Prometheus CRDs (DISABLED)"
 echo "=================================="
 
+# Prometheus disabled for local demo to reduce resource usage
+# In production, Prometheus provides essential observability
+echo "⚠️  Prometheus CRDs installation SKIPPED"
+echo "   Reason: Resource constraints on local kind cluster"
+echo "   Impact: No metrics collection (acceptable for demo)"
+echo "   Production: Uncomment prometheus.yaml.disabled and this section"
+
 # Install Prometheus CRDs required for ServiceMonitors
-if [ -f "${SCRIPT_DIR}/install-prometheus-crds.sh" ]; then
-  echo "Installing Prometheus CRDs (required for metrics collection)..."
-  "${SCRIPT_DIR}/install-prometheus-crds.sh"
-  echo "✓ Prometheus CRDs installed"
-else
-  echo "⚠️  install-prometheus-crds.sh not found, skipping..."
-fi
+# if [ -f "${SCRIPT_DIR}/install-prometheus-crds.sh" ]; then
+#   echo "Installing Prometheus CRDs (required for metrics collection)..."
+#   "${SCRIPT_DIR}/install-prometheus-crds.sh"
+#   echo "✓ Prometheus CRDs installed"
+# else
+#   echo "⚠️  install-prometheus-crds.sh not found, skipping..."
+# fi
 
 echo ""
 echo "=================================="

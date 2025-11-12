@@ -18,11 +18,11 @@ service:
 # Resource limits
 resources:
   requests:
-    memory: "256Mi"
-    cpu: "200m"
+    memory: "128Mi"
+    cpu: "100m"
   limits:
-    memory: "512Mi"
-    cpu: "500m"
+    memory: "256Mi"
+    cpu: "300m"
 
 # Node scheduling - schedule on general worker
 nodeSelector:
@@ -48,7 +48,7 @@ persistence:
   enabled: true
   storageClass: "standard"
   accessMode: ReadWriteOnce
-  size: 2Gi
+  size: 1Gi
   mountPath: /app/backend/data
 
 # Security context - run as non-root

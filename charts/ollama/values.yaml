@@ -18,10 +18,10 @@ service:
 # Resource limits
 resources:
   requests:
-    memory: "2Gi"
-    cpu: "2000m"
+    memory: "1Gi"
+    cpu: "500m"
   limits:
-    memory: "6Gi"
+    memory: "4Gi"
     cpu: "4000m"
 
 # Node scheduling - schedule on inference node
@@ -40,7 +40,7 @@ persistence:
   enabled: true
   storageClass: "standard"
   accessMode: ReadWriteOnce
-  size: 20Gi
+  size: 5Gi
   mountPath: /home/ollama/.ollama
 
 # Security context - run as non-root

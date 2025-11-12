@@ -9,9 +9,8 @@ metadata:
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
   annotations:
-    # Run this job after Ollama's PVC is created
-    argocd.argoproj.io/hook: PostSync
-    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+    # Run this job in sync wave 1, after Ollama PVC is created (wave 0)
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   backoffLimit: {{ .Values.job.backoffLimit }}
   ttlSecondsAfterFinished: {{ .Values.job.ttlSecondsAfterFinished }}
