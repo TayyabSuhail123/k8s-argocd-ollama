@@ -11,6 +11,8 @@ metadata:
   annotations:
     # Run this job in sync wave 1, after Ollama PVC is created (wave 0)
     argocd.argoproj.io/sync-wave: "1"
+    # Force ArgoCD to replace the Job instead of updating it (Jobs are immutable)
+    argocd.argoproj.io/sync-options: Replace=true
 spec:
   backoffLimit: {{ .Values.job.backoffLimit }}
   ttlSecondsAfterFinished: {{ .Values.job.ttlSecondsAfterFinished }}
