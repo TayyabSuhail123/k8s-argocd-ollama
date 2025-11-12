@@ -99,9 +99,9 @@ readinessProbe:
 # Environment variables
 env: []
 
-# Prometheus metrics
+# Prometheus metrics (disabled - no Prometheus in demo)
 metrics:
-  enabled: true
+  enabled: false
 
 # NetworkPolicy
 networkPolicy:
