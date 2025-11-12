@@ -1,0 +1,11 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "openwebui.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "openwebui.labels" . | nindent 4 }}
+rules:
+  # OpenWebUI doesn't need any Kubernetes API access
+  # Empty rules = no permissions
+  []

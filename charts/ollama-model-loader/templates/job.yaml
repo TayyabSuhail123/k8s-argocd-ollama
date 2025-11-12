@@ -30,6 +30,7 @@ spec:
       tolerations:
         {{- toYaml .Values.tolerations | nindent 8 }}
       {{- end }}
+      serviceAccountName: {{ .Release.Name }}-model-loader
       restartPolicy: {{ .Values.job.restartPolicy }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}

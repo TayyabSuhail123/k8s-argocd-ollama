@@ -1,0 +1,18 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Release.Name }}-model-loader
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: ollama-model-loader
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ .Release.Name }}-model-loader
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Release.Name }}-model-loader
+    namespace: {{ .Release.Namespace }}

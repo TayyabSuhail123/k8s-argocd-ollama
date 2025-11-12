@@ -98,3 +98,7 @@ env: []
 # Prometheus metrics (disabled - no Prometheus in demo)
 metrics:
   enabled: false
+
+# Network Policy for restricting pod communication
+networkPolicy:
+  enabled: true
