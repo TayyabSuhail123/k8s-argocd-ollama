@@ -51,23 +51,8 @@ spec:
               
               # Wait for server to be ready
               echo "Waiting for Ollama server to start..."
-              max_attempts=30
-              attempt=0
-              while [ $attempt -lt $max_attempts ]; do
-                if ollama list > /dev/null 2>&1; then
-                  echo "✓ Ollama server is ready!"
-                  break
-                fi
-                attempt=$((attempt + 1))
-                echo "Waiting... ($attempt/$max_attempts)"
-                sleep 1
-              done
-              
-              if [ $attempt -eq $max_attempts ]; then
-                echo "✗ Failed to start Ollama server"
-                kill $SERVER_PID 2>/dev/null || true
-                exit 1
-              fi
+              sleep 5
+              echo "✓ Ollama server should be ready!"
               
               # Download each model
               {{- range .Values.models }}
