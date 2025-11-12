@@ -1,0 +1,105 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-model-loader
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: ollama-model-loader
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    # Run this job after Ollama's PVC is created
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: {{ .Values.job.backoffLimit }}
+  ttlSecondsAfterFinished: {{ .Values.job.ttlSecondsAfterFinished }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ollama-model-loader
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations:
+        {{- toYaml .Values.tolerations | nindent 8 }}
+      {{- end }}
+      restartPolicy: {{ .Values.job.restartPolicy }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: model-loader
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              
+              echo "Starting Ollama model loader..."
+              echo "Models to download: {{ join ", " .Values.models }}"
+              
+              # Start Ollama server in background
+              echo "Starting Ollama server..."
+              ollama serve &
+              SERVER_PID=$!
+              
+              # Wait for server to be ready
+              echo "Waiting for Ollama server to start..."
+              max_attempts=60
+              attempt=0
+              while [ $attempt -lt $max_attempts ]; do
+                if curl -s http://localhost:11434/ > /dev/null 2>&1; then
+                  echo "✓ Ollama server is ready!"
+                  break
+                fi
+                attempt=$((attempt + 1))
+                echo "Waiting... ($attempt/$max_attempts)"
+                sleep 2
+              done
+              
+              if [ $attempt -eq $max_attempts ]; then
+                echo "✗ Failed to start Ollama server"
+                kill $SERVER_PID 2>/dev/null || true
+                exit 1
+              fi
+              
+              # Download each model
+              {{- range .Values.models }}
+              echo "Downloading model: {{ . }}"
+              if ollama pull {{ . }}; then
+                echo "✓ Successfully downloaded: {{ . }}"
+              else
+                echo "✗ Failed to download: {{ . }}"
+                # Continue with other models even if one fails
+              fi
+              {{- end }}
+              
+              # Stop server gracefully
+              echo "Stopping Ollama server..."
+              kill $SERVER_PID
+              wait $SERVER_PID 2>/dev/null || true
+              
+              echo "✓ Model loading complete!"
+          env:
+            - name: OLLAMA_MODELS
+              value: {{ .Values.persistence.mountPath }}
+            - name: HOME
+              value: /home/ollama
+          volumeMounts:
+            - name: models
+              mountPath: {{ .Values.persistence.mountPath }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: models
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim }}
