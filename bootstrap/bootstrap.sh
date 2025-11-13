@@ -67,28 +67,21 @@ echo "✓ Namespaces created: argocd, ai-platform, monitoring"
 
 echo ""
 echo "=================================="
-echo "Step 4/7: Installing Prometheus CRDs (DISABLED)"
+echo "Step 4/7: Installing Prometheus CRDs"
 echo "=================================="
 
-# Prometheus disabled for local demo to reduce resource usage
-# In production, Prometheus provides essential observability
-echo "⚠️  Prometheus CRDs installation SKIPPED"
-echo "   Reason: Resource constraints on local kind cluster"
-echo "   Impact: No metrics collection (acceptable for demo)"
-echo "   Production: Uncomment prometheus.yaml.disabled and this section"
-
-Install Prometheus CRDs required for ServiceMonitors
-if [ -f "${SCRIPT_DIR}/install-prometheus-crds.sh" ]; then
-  echo "Installing Prometheus CRDs (required for metrics collection)..."
-  "${SCRIPT_DIR}/install-prometheus-crds.sh"
-  echo "✓ Prometheus CRDs installed"
-else
-  echo "⚠️  install-prometheus-crds.sh not found, skipping..."
-fi
+  # Install Prometheus CRDs required for ServiceMonitors
+  # if [ -f "${SCRIPT_DIR}/install-prometheus-crds.sh" ]; then
+  #   echo "Installing Prometheus CRDs (required for metrics collection)..."
+  #   "${SCRIPT_DIR}/install-prometheus-crds.sh"
+  #   echo "✓ Prometheus CRDs installed"
+  # else
+  #   echo "⚠️  install-prometheus-crds.sh not found, skipping..."
+  # fi
 
 echo ""
 echo "=================================="
-echo "Step 5/7: Pre-loading images (SKIPPED - using local registry)"
+echo "Step 5/7: Using local registry"
 echo "=================================="
 
 # Images are pulled from local registry (localhost:5001) instead of remote
@@ -116,9 +109,7 @@ if ! kubectl apply -n argocd -f "${ARGOCD_MANIFEST_URL}"; then
   exit 1
 fi
 
-echo "Waiting for ArgoCD pods to be ready (this may take 3-5 minutes on first run)..."
-echo "Tip: ArgoCD images are pulled from internet once. Subsequent cluster recreations will be faster."
-echo ""
+echo "Waiting for ArgoCD core components to be ready (this may take several minutes)..."
 
 if ! kubectl wait --for=condition=Ready pods --all -n argocd --timeout=600s; then
   echo ""

@@ -18,7 +18,7 @@ spec:
         # Use default values from values.yaml
         # Connects to Ollama at: http://ollama.ai-platform.svc.cluster.local:11434
         metrics:
-          enabled: true
+          enabled: false
   destination:
     server: https://kubernetes.default.svc
     namespace: ai-platform
