@@ -18,7 +18,7 @@ spec:
         # Use default values from values.yaml
         # Models will be preloaded: llama3.2:3b
         metrics:
-          enabled: false
+          enabled: true
   destination:
     server: https://kubernetes.default.svc
     namespace: ai-platform
