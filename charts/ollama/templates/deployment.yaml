@@ -76,6 +76,23 @@ spec:
               mountPath: {{ .Values.persistence.mountPath }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
+        - name: metrics-proxy
+          image: ghcr.io/ollama/ollama-prometheus-exporter:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: OLLAMA_API_URL
+              value: "http://localhost:11434"
+          ports:
+            - name: metrics
+              containerPort: 9999
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 50m
+              memory: 128Mi
       volumes:
         - name: data
           {{- if .Values.persistence.enabled }}

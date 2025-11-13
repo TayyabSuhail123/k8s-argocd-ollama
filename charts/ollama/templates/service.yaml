@@ -15,6 +15,10 @@ spec:
       targetPort: {{ .Values.service.targetPort }}
       protocol: TCP
       name: http
+    - port: 9999
+      targetPort: 9999
+      protocol: TCP
+      name: metrics
   selector:
     app.kubernetes.io/name: ollama
     app.kubernetes.io/instance: {{ .Release.Name }}
