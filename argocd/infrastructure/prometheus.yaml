@@ -39,6 +39,9 @@ spec:
                   resources:
                     requests:
                       storage: 5Gi
+            # Allow ServiceMonitor discovery in all namespaces
+            serviceMonitorNamespaceSelector: {}
+            serviceMonitorSelector: {}
         
         # Disable components we don't need for now
         alertmanager:
