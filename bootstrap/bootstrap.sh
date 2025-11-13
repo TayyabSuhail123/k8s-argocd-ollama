@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Bootstrap script for AI Platform GitOps case study
-# Creates a hardened kind cluster with node isolation and installs ArgoCD
-# Follows production-grade practices: RBAC, NetworkPolicies, GitOps-only workflow
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CLUSTER_NAME="ai-platform-kind"
@@ -60,9 +57,11 @@ kubectl label namespace argocd name=argocd --overwrite
 
 kubectl create namespace ai-platform || true
 kubectl label namespace ai-platform name=ai-platform --overwrite
+kubectl label namespace ai-platform pod-security.kubernetes.io/enforce=restricted pod-security.kubernetes.io/audit=restricted pod-security.kubernetes.io/warn=restricted --overwrite
 
 kubectl create namespace monitoring || true
 kubectl label namespace monitoring name=monitoring --overwrite
+kubectl label namespace monitoring pod-security.kubernetes.io/enforce=restricted pod-security.kubernetes.io/audit=restricted pod-security.kubernetes.io/warn=restricted --overwrite
 
 echo "✓ Namespaces created: argocd, ai-platform, monitoring"
 
@@ -78,14 +77,14 @@ echo "   Reason: Resource constraints on local kind cluster"
 echo "   Impact: No metrics collection (acceptable for demo)"
 echo "   Production: Uncomment prometheus.yaml.disabled and this section"
 
-# Install Prometheus CRDs required for ServiceMonitors
-# if [ -f "${SCRIPT_DIR}/install-prometheus-crds.sh" ]; then
-#   echo "Installing Prometheus CRDs (required for metrics collection)..."
-#   "${SCRIPT_DIR}/install-prometheus-crds.sh"
-#   echo "✓ Prometheus CRDs installed"
-# else
-#   echo "⚠️  install-prometheus-crds.sh not found, skipping..."
-# fi
+Install Prometheus CRDs required for ServiceMonitors
+if [ -f "${SCRIPT_DIR}/install-prometheus-crds.sh" ]; then
+  echo "Installing Prometheus CRDs (required for metrics collection)..."
+  "${SCRIPT_DIR}/install-prometheus-crds.sh"
+  echo "✓ Prometheus CRDs installed"
+else
+  echo "⚠️  install-prometheus-crds.sh not found, skipping..."
+fi
 
 echo ""
 echo "=================================="
@@ -121,7 +120,6 @@ echo "Waiting for ArgoCD pods to be ready (this may take 3-5 minutes on first ru
 echo "Tip: ArgoCD images are pulled from internet once. Subsequent cluster recreations will be faster."
 echo ""
 
-# Wait with longer timeout and show progress
 if ! kubectl wait --for=condition=Ready pods --all -n argocd --timeout=600s; then
   echo ""
   echo "⚠️  ArgoCD pods did not become ready within 10 minutes."

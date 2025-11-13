@@ -28,10 +28,3 @@ nodes:
             - key: "role"
               value: "inference"
               effect: "NoSchedule"
-
-# Production-grade local cluster configuration with local registry:
-# - Local Docker registry (localhost:5000) for fast image pulls
-# - 3 nodes: control-plane (no workloads), general worker, inference worker
-# - Inference node is tainted to ensure only Ollama (with toleration) runs there
-# - Node labels enable explicit nodeSelector scheduling
-# - Access services via kubectl port-forward (production-like approach)

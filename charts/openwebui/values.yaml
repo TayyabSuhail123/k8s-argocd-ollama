@@ -21,8 +21,8 @@ resources:
     memory: "128Mi"
     cpu: "100m"
   limits:
-    memory: "256Mi"
-    cpu: "300m"
+    memory: "512Mi"
+    cpu: "500m"
 
 # Node scheduling - schedule on general worker
 nodeSelector:

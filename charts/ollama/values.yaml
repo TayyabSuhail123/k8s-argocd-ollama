@@ -18,11 +18,11 @@ service:
 # Resource limits
 resources:
   requests:
-    memory: "1Gi"
-    cpu: "500m"
+    memory: "512Mi"
+    cpu: "200m"
   limits:
-    memory: "4Gi"
-    cpu: "4000m"
+    memory: "2Gi"
+    cpu: "1000m"
 
 # Node scheduling - schedule on inference node
 nodeSelector:
