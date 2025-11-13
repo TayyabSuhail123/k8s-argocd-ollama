@@ -77,14 +77,22 @@ spec:
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
         - name: metrics-proxy
-          image: ghcr.io/ollama/ollama-prometheus-exporter:latest
+          image: lucabecker42/ollama-exporter:latest
           imagePullPolicy: IfNotPresent
           env:
-            - name: OLLAMA_API_URL
-              value: "http://localhost:11434"
+            - name: PORT
+              value: "8000"
+            - name: OLLAMA_HOST
+              value: "localhost:11434"
+            - name: INTERVAL
+              value: "30"
+            - name: API_TIMEOUT
+              value: "30"
+            - name: LOG_LEVEL
+              value: "INFO"
           ports:
             - name: metrics
-              containerPort: 9999
+              containerPort: 8000
               protocol: TCP
           resources:
             requests:

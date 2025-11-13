@@ -15,8 +15,8 @@ spec:
       targetPort: {{ .Values.service.targetPort }}
       protocol: TCP
       name: http
-    - port: 9999
-      targetPort: 9999
+    - port: 8000
+      targetPort: 8000
       protocol: TCP
       name: metrics
   selector:
