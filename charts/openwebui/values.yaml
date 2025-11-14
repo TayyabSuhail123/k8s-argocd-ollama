@@ -104,7 +104,7 @@ env: []
 
 # Prometheus metrics 
 metrics:
-  enabled: true
+  enabled: false
 
 # NetworkPolicy
 networkPolicy:
