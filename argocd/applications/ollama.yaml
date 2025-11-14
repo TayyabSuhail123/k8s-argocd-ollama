@@ -14,11 +14,6 @@ spec:
     path: charts/ollama
     helm:
       releaseName: ollama
-      values: |
-        # Use default values from values.yaml
-        # Models will be preloaded: llama3.2:3b
-        metrics:
-          enabled: true
   destination:
     server: https://kubernetes.default.svc
     namespace: ai-platform
