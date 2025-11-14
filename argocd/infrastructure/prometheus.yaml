@@ -16,7 +16,7 @@ spec:
     helm:
       releaseName: prometheus
       skipCrds: true  # Skip CRD management - install manually to avoid annotation size issues
-      timeout: 10m  # Increase timeout for large chart
+      timeout: 10m  
       values: |
         # Lightweight Prometheus for local testing
         prometheus:
