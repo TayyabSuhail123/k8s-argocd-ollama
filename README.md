@@ -1,166 +1,160 @@
 # AI Platform GitOps Case Study
 
-**Production-grade local Kubernetes deployment of an AI inference stack**
+**A production-grade, local Kubernetes AI inference platform with full GitOps automation**
 
-This repository demonstrates how to deploy and manage a local AI platform (Ollama + Open WebUI + Prometheus) on a kind cluster using **GitOps principles with ArgoCD as the single source of truth**.
+This project bootstraps a secure, multi-node kind cluster and deploys an AI platform (Ollama, OpenWebUI, Prometheus) using ArgoCD as the single source of truth. All infrastructure and application state is managed declaratively via Git.
 
-## Project Status
+---
 
-🚧 **Phase 1: Bootstrap (Current)** — Cluster creation and ArgoCD installation  
-✅ **Phase 2: Core Services** — Hardened Helm charts for Ollama, OpenWebUI, Prometheus, with security best practices and least-privilege network policies  
-✅ **Phase 3: GitOps Integration** — ArgoCD Applications manage all deployments, with no manual overrides; all configuration is version-controlled  
-🔜 **Phase 4: Observability** — Metrics, dashboards, and monitoring (metrics are disabled by default; see below)
+## What This Project Does
+
+- **Bootstraps a 3-node kind Kubernetes cluster** with node isolation (control, general, inference)
+- **Installs ArgoCD** for GitOps-driven deployment and management
+- **Deploys hardened Helm charts** for Ollama (LLM inference), OpenWebUI (chat UI), and Prometheus (monitoring)
+- **Applies strict security**: network policies, namespace isolation, non-root containers, RBAC, and no secrets in values.yaml
+- **Enables true GitOps**: all changes are made via Git commits, ArgoCD syncs automatically, no manual `kubectl` or `helm` commands
+- **Metrics and ServiceMonitors are disabled by default** for security and simplicity; can be enabled with a single value
+
+---
 
 ## Architecture Overview
 
-### Infrastructure
-- **3-node kind cluster** (1 control-plane, 2 workers)
-- **Node isolation** via labels and taints:
-  - Control plane: no workloads
+- **3-node kind cluster**: 1 control-plane, 2 workers (general, inference)
+- **Node isolation**: 
   - General worker (`role=general`): OpenWebUI, Prometheus
   - Inference worker (`role=inference`): Ollama only (tainted)
+- **Namespaces**: `argocd`, `ai-platform`, `monitoring`
+- **Network policies**: Deny-all by default, explicit allow rules for only necessary traffic
+- **ArgoCD**: All deployments and configuration managed via Git
+- **No secrets in values.yaml**: All secrets are managed externally (e.g., SealedSecrets)
 
-### Security Hardening
-- Network policies (deny-all by default, explicit allow rules)
-- Namespace isolation (argocd, ai-platform, monitoring)
-- Non-root containers with dropped capabilities
-- Resource limits on all pods
-- RBAC per service with dedicated ServiceAccounts
-- **No secrets in values.yaml**; all secrets are managed externally (e.g., SealedSecrets)
-
-### GitOps Workflow
-- **ArgoCD** manages all deployments
-- **Git** is the single source of truth
-- No imperative `kubectl apply` or `helm install` commands
-- Automated sync and self-healing
-- **All Helm values are managed in version control**; ArgoCD Application manifests do not override chart defaults unless explicitly needed
-
-## Repository Structure
-
-```
-ai-platform-case-study/
-├── README.md                    # This file
-├── .github/
-│   └── copilot-instructions.md  # Development guidelines and hardening rules
-└── bootstrap/                   # Phase 1: Cluster + ArgoCD setup
-    ├── README.md               # Detailed bootstrap guide
-    ├── kind-cluster.yaml       # Cluster definition with node labels/taints
-    ├── bootstrap.sh            # Automated setup script
-    └── argocd-install.yaml     # ArgoCD NetworkPolicies
-```
+---
 
 ## Quick Start
 
 ### Prerequisites
 
-```bash
-# macOS (Homebrew)
-brew install kind kubectl helm
+- [kind](https://kind.sigs.k8s.io/)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/)
+- [helm](https://helm.sh/)
+- (Optional) [argocd CLI](https://argo-cd.readthedocs.io/en/stable/cli_installation/)
 
-# Verify installations
-kind version
-kubectl version --client
+Install on macOS:
+```bash
+brew install kind kubectl helm
 ```
 
-### Phase 1: Bootstrap the Cluster
+### 1. Bootstrap the Cluster
 
 ```bash
-# Clone this repository
 cd ai-platform-case-study
-
-# Run bootstrap script
 chmod +x bootstrap/bootstrap.sh
 ./bootstrap/bootstrap.sh
 ```
-
 This will:
-1. Create a 3-node kind cluster with proper node isolation
-2. Install ArgoCD using the official manifest
-3. Apply network policies for security hardening
-4. Create namespaces (argocd, ai-platform, monitoring)
+- Create a 3-node kind cluster with node labels/taints
+- Install ArgoCD
+- Create namespaces and apply network policies
 
-### Verify Installation
+### 2. Access ArgoCD
 
 ```bash
-# Check cluster nodes and labels
-kubectl get nodes --show-labels
-
-# Verify ArgoCD is running
-kubectl get pods -n argocd
-
-# Access ArgoCD UI
 kubectl port-forward svc/argocd-server -n argocd 8080:443
-# Open https://localhost:8080
-# Username: admin
-# Password: kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d
+# In another terminal:
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d
+```
+- Open https://localhost:8080
+- Username: `admin`
+- Password: (output from above command)
+
+### 3. Deploy the AI Platform
+
+ArgoCD will automatically sync all applications defined in `/argocd/applications/`:
+- Ollama (LLM inference)
+- OpenWebUI (chat interface)
+- Prometheus (monitoring, metrics disabled by default)
+
+You can monitor sync status in the ArgoCD UI.
+
+---
+
+## Repository Structure
+
+```
+ai-platform-case-study/
+├── README.md
+├── bootstrap/           # Cluster and ArgoCD bootstrap scripts
+├── charts/              # Hardened Helm charts for all services
+├── argocd/
+│   ├── applications/    # ArgoCD Application manifests (one per service)
+│   └── infrastructure/  # Infra apps (metrics-server, sealed-secrets, etc)
+└── .github/             # Hardening guidelines and dev instructions
 ```
 
-## Development Principles
+---
 
-This case study follows production-grade practices for a local demo:
+## Security & Hardening
 
-✅ **All infrastructure is declarative and version-controlled**  
-✅ **ArgoCD is the only deployment mechanism** (no manual kubectl/helm)  
-✅ **Security by default** (NetworkPolicies, RBAC, non-root containers)  
-✅ **Node isolation** for workload separation (inference vs general)  
-✅ **Comprehensive documentation** with production migration notes
-✅ **Metrics and ServiceMonitors are disabled by default**; to enable, set `metrics.enabled: true` in the relevant chart values. ServiceMonitor resources are only created if metrics are enabled and Prometheus CRDs are present.
+- **Network policies**: Deny-all by default, only allow required traffic (e.g., OpenWebUI → Ollama, Prometheus → metrics)
+- **Namespace isolation**: Workloads separated by namespace
+- **Non-root containers**: All pods run as non-root, with dropped Linux capabilities
+- **RBAC**: Dedicated ServiceAccounts per service
+- **No secrets in values.yaml**: All secrets are managed via SealedSecrets or other external tools
+- **Resource limits**: All pods have CPU/memory requests and limits
 
-See `.github/copilot-instructions.md` for detailed hardening guidelines.
+---
 
-## Next Steps
+## GitOps Workflow
 
-Once bootstrap is complete:
+- **All changes are made via Git**: No manual `kubectl apply` or `helm install`
+- **ArgoCD auto-syncs**: Any commit to the repo is automatically applied to the cluster
+- **No manual overrides**: All Helm values are managed in version control; Application manifests do not override chart defaults unless explicitly needed
 
-1. **Create Helm Charts** — Build hardened charts for Ollama, OpenWebUI, Prometheus
-2. **ArgoCD Applications** — Define Application manifests in `/argocd` directory
-3. **GitOps Workflow** — Commit changes → ArgoCD auto-sync
-4. **Observability** — Add Prometheus ServiceMonitors and dashboards
+---
 
-## Production Migration Path
+## Enabling Metrics & Observability
 
-This local setup demonstrates patterns that scale to production:
+- By default, `metrics.enabled: false` in all charts for security and simplicity
+- To enable Prometheus metrics and ServiceMonitors:
+  1. Install Prometheus CRDs:  
+     `./bootstrap/install-prometheus-crds.sh`
+  2. Set `metrics.enabled: true` in the relevant chart values (either in values.yaml or via ArgoCD Application manifest)
+- ServiceMonitor resources are only created if metrics are enabled and CRDs are present
 
-| Local Demo | Production Equivalent |
-|------------|----------------------|
-| Kind cluster | EKS/GKE/AKS with multiple node groups |
-| K8s Secrets | HashiCorp Vault + External Secrets Operator |
-| Node labels/taints | GPU node pools with taints |
-| NodePort services | Ingress with TLS (cert-manager) |
-| Local storage | Persistent volumes with CSI drivers |
-| Single ArgoCD instance | HA ArgoCD with GitOps Bridge |
+---
 
 ## Troubleshooting
 
-### ServiceMonitor/metrics errors
-If you see errors about ServiceMonitor or `monitoring.coreos.com/v1` CRDs missing, ensure that:
-- `metrics.enabled: false` in your chart values (default)
-- No ArgoCD Application manifest is overriding this value
-- If you want to enable metrics, install the Prometheus Operator CRDs first (see `bootstrap/install-prometheus-crds.sh`)
+- **ServiceMonitor/metrics errors**:  
+  - Ensure `metrics.enabled: false` (default) or install Prometheus CRDs if enabling metrics
+  - No Application manifest should override this unless you intend to enable metrics
+- **Delete and recreate cluster**:
+  ```bash
+  kind delete cluster --name ai-platform-kind
+  ./bootstrap/bootstrap.sh
+  ```
+- **Check ArgoCD logs**:
+  ```bash
+  kubectl logs -n argocd -l app.kubernetes.io/name=argocd-server
+  ```
+- **Verify network policies**:
+  ```bash
+  kubectl get networkpolicies -n argocd
+  ```
 
-### Delete and recreate cluster
-```bash
-kind delete cluster --name ai-platform-kind
-./bootstrap/bootstrap.sh
-```
+---
 
-### Check ArgoCD logs
-```bash
-kubectl logs -n argocd -l app.kubernetes.io/name=argocd-server
-```
+## Production Migration Path
 
-### Verify network policies
-```bash
-kubectl get networkpolicies -n argocd
-```
+| Local Demo         | Production Equivalent                        |
+|--------------------|---------------------------------------------|
+| kind cluster       | EKS/GKE/AKS with multiple node groups       |
+| K8s Secrets        | HashiCorp Vault + External Secrets Operator |
+| Node labels/taints | GPU node pools with taints                  |
+| NodePort services  | Ingress with TLS (cert-manager)             |
+| Local storage      | Persistent volumes with CSI drivers         |
+| Single ArgoCD      | HA ArgoCD with GitOps Bridge                |
 
-## Contributing
+---
 
-This is a case study repository for demonstrating GitOps best practices. Each commit should:
-- Have a clear description of the change
-- Follow the hardening guidelines in `.github/copilot-instructions.md`
-- Include necessary documentation updates
 
-## License
-
-MIT License - See LICENSE file for details
