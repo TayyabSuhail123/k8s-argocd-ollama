@@ -7,9 +7,9 @@ This repository demonstrates how to deploy and manage a local AI platform (Ollam
 ## Project Status
 
 🚧 **Phase 1: Bootstrap (Current)** — Cluster creation and ArgoCD installation  
-🔜 **Phase 2: Core Services** — Helm charts for Ollama, OpenWebUI, Prometheus  
-🔜 **Phase 3: GitOps Integration** — ArgoCD Applications and automated sync  
-🔜 **Phase 4: Observability** — Metrics, dashboards, and monitoring
+✅ **Phase 2: Core Services** — Hardened Helm charts for Ollama, OpenWebUI, Prometheus, with security best practices and least-privilege network policies  
+✅ **Phase 3: GitOps Integration** — ArgoCD Applications manage all deployments, with no manual overrides; all configuration is version-controlled  
+🔜 **Phase 4: Observability** — Metrics, dashboards, and monitoring (metrics are disabled by default; see below)
 
 ## Architecture Overview
 
@@ -26,12 +26,14 @@ This repository demonstrates how to deploy and manage a local AI platform (Ollam
 - Non-root containers with dropped capabilities
 - Resource limits on all pods
 - RBAC per service with dedicated ServiceAccounts
+- **No secrets in values.yaml**; all secrets are managed externally (e.g., SealedSecrets)
 
 ### GitOps Workflow
 - **ArgoCD** manages all deployments
 - **Git** is the single source of truth
 - No imperative `kubectl apply` or `helm install` commands
 - Automated sync and self-healing
+- **All Helm values are managed in version control**; ArgoCD Application manifests do not override chart defaults unless explicitly needed
 
 ## Repository Structure
 
@@ -102,6 +104,7 @@ This case study follows production-grade practices for a local demo:
 ✅ **Security by default** (NetworkPolicies, RBAC, non-root containers)  
 ✅ **Node isolation** for workload separation (inference vs general)  
 ✅ **Comprehensive documentation** with production migration notes
+✅ **Metrics and ServiceMonitors are disabled by default**; to enable, set `metrics.enabled: true` in the relevant chart values. ServiceMonitor resources are only created if metrics are enabled and Prometheus CRDs are present.
 
 See `.github/copilot-instructions.md` for detailed hardening guidelines.
 
@@ -128,6 +131,12 @@ This local setup demonstrates patterns that scale to production:
 | Single ArgoCD instance | HA ArgoCD with GitOps Bridge |
 
 ## Troubleshooting
+
+### ServiceMonitor/metrics errors
+If you see errors about ServiceMonitor or `monitoring.coreos.com/v1` CRDs missing, ensure that:
+- `metrics.enabled: false` in your chart values (default)
+- No ArgoCD Application manifest is overriding this value
+- If you want to enable metrics, install the Prometheus Operator CRDs first (see `bootstrap/install-prometheus-crds.sh`)
 
 ### Delete and recreate cluster
 ```bash
