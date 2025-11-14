@@ -12,13 +12,12 @@ data:
   OLLAMA_BASE_URL: {{ .Values.ollama.url | quote }}
   WEBUI_AUTH: "true"
   {{- if .Values.rag.enabled }}
-  # RAG enabled - use local sentence-transformers
   RAG_EMBEDDING_ENGINE: "sentence-transformers"
   RAG_EMBEDDING_MODEL: {{ .Values.rag.embeddingModel | quote }}
-  ENABLE_RAG_WEB_SEARCH: "false"
+  ENABLE_RAG_WEB_SEARCH: {{ .Values.enableRagWebSearch | quote }}
   {{- else }}
   # RAG disabled - no embedding model
   RAG_EMBEDDING_ENGINE: ""
   RAG_EMBEDDING_MODEL: ""
-  ENABLE_RAG_WEB_SEARCH: "false"
+  ENABLE_RAG_WEB_SEARCH: {{ .Values.enableRagWebSearch | quote }}
   {{- end }}

@@ -43,6 +43,9 @@ rag:
   # Pre-download embedding model via init container (requires internet during init)
   preloadModel: false
 
+# Enable/disable RAG web search (exposed in configmap)
+enableRagWebSearch: false
+
 # Storage for data
 persistence:
   enabled: true
@@ -126,23 +129,4 @@ networkPolicy:
       ports:
         - protocol: UDP
           port: 53
-    # Allow HTTPS for HuggingFace model downloads (external internet)
-    # Note: This allows external HTTPS traffic needed for init container model downloads
-    # In production, consider using a proxy or pre-baking models into a custom image
-    - ports:
-        - protocol: TCP
-          port: 443
 
-# Secret configuration for sensitive values (production: set a stable secret)
-# - If `existingSecret` is set, the chart will use that Secret and will NOT create one.
-# - If `create` is true and `existingSecret` is empty, the chart will create a Secret.
-#   The secret value will be taken from `secretKey` if provided, otherwise a random
-#   value will be generated on install only (Helm generates a stable value for the
-#   initial install; subsequent upgrades won't re-generate).
-secret:
-  create: true
-  # If you already have a Secret, set its name here to avoid creating a new one
-  existingSecret: ""
-  # Optional: provide a secret value here (string). If empty, a random key is generated on install.
-  # WARNING: putting secrets into values files may be visible in git; prefer external secret management
-  secretKey: ""

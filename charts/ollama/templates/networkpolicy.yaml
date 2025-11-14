@@ -46,12 +46,4 @@ spec:
       ports:
         - protocol: UDP
           port: 53
-    # Allow downloading models from internet
-    - to:
-        - namespaceSelector: {}
-      ports:
-        - protocol: TCP
-          port: 443
-        - protocol: TCP
-          port: 80
 {{- end }}

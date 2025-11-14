@@ -62,9 +62,6 @@ podSecurityContext:
   seccompProfile:
     type: RuntimeDefault
 
-# Models to preload (will be downloaded on startup)
-models:
-  - tinyllama:1.1b
 
 # ServiceAccount
 serviceAccount:
@@ -95,9 +92,9 @@ readinessProbe:
 # Environment variables
 env: []
 
-# Prometheus metrics (disabled - no Prometheus in demo)
+# Prometheus metrics 
 metrics:
-  enabled: true
+  enabled: false
 
 # Network Policy for restricting pod communication
 networkPolicy:
